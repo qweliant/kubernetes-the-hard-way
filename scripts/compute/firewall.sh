@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # create firewall rules
 # internal communications are all go
 gcloud compute firewall-rules create kubernetes-the-hard-way-allow-internal \

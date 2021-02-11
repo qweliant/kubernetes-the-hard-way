@@ -1,3 +1,5 @@
+#!/bin/bash
+
 {
 
 cat > kube-proxy-csr.json <<EOF

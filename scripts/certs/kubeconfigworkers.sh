@@ -1,3 +1,5 @@
+#!/bin/bash
+
 for instance in worker-0 worker-1 worker-2; do
   kubectl config set-cluster kubernetes-the-hard-way \
     --certificate-authority=ca.pem \

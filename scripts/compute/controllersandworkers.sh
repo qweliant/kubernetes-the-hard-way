@@ -1,4 +1,4 @@
-#! bin/bash
+#!/bin/bash
 
 # create 3 controller instances
 for i in 0 1 2; do

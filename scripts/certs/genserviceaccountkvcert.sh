@@ -1,3 +1,5 @@
+#!/bin/bash
+
 {
 
 cat > service-account-csr.json <<EOF
