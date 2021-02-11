@@ -1,7 +1,7 @@
 #! bin/bash
 
 KUBERNETES_PUBLIC_ADDRESS=$(gcloud compute addresses describe kubernetes-the-hard-way \
-  --region us-east1 \
+  --region $(gcloud config get-value compute/region) \
   --format 'value(address)')
 
   
