@@ -1,15 +1,19 @@
 #!/bin/bash
 
+#  Run the following commands from the same machine used to create the compute instances.
 # Create the external load balancer network resources:
+
 {
   KUBERNETES_PUBLIC_ADDRESS=$(gcloud compute addresses describe kubernetes-the-hard-way \
     --region $(gcloud config get-value compute/region) \
     --format 'value(address)')
 
+  echo "$KUBERNETES_PUBLIC_ADDRESS"
+
   gcloud compute http-health-checks create kubernetes \
-    --description "Kubernetes Health Check" \
-    --host "kubernetes.default.svc.cluster.local" \
-    --request-path "/healthz"
+    --description="Kubernetes Health Check" \
+    --host="kubernetes.default.svc.cluster.local" \
+    --request-path="/healthz"
 
   gcloud compute firewall-rules create kubernetes-the-hard-way-allow-health-check \
     --network kubernetes-the-hard-way \

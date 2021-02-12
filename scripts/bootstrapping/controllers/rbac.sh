@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# run once
+# run once on one controller
 
 # Create the system:kube-apiserver-to-kubelet ClusterRole with permissions to 
 # access the Kubelet API and perform most common tasks associated with managing pods:

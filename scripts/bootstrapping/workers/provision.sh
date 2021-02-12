@@ -1,14 +1,23 @@
 #!/bin/bash
 
+# Install the OS dependencies:
 {
   sudo apt-get update
   sudo apt-get -y install socat conntrack ipset
 }
 
+# Disable Swap
+# By default the kubelet will fail to start if swap is enabled.
+# It is recommended that swap be disabled to ensure Kubernetes can 
+# provide proper resource allocation and quality of service.
+
+# check to see if on
 sudo swapon --show
 
 sudo swapoff -a
 
+
+# Download and Install Worker Binaries
 wget -q --show-progress --https-only --timestamping \
   https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.18.0/crictl-v1.18.0-linux-amd64.tar.gz \
   https://github.com/opencontainers/runc/releases/download/v1.0.0-rc91/runc.amd64 \
@@ -18,6 +27,7 @@ wget -q --show-progress --https-only --timestamping \
   https://storage.googleapis.com/kubernetes-release/release/v1.18.6/bin/linux/amd64/kube-proxy \
   https://storage.googleapis.com/kubernetes-release/release/v1.18.6/bin/linux/amd64/kubelet
 
+# Create the installation directories:
 sudo mkdir -p \
   /etc/cni/net.d \
   /opt/cni/bin \
@@ -26,6 +36,8 @@ sudo mkdir -p \
   /var/lib/kubernetes \
   /var/run/kubernetes
 
+
+# Install the worker binaries:
 {
   mkdir containerd
   tar -xvf crictl-v1.18.0-linux-amd64.tar.gz
@@ -38,12 +50,11 @@ sudo mkdir -p \
 }
 
 
-
+# Retrieve the Pod CIDR range for the current compute instance:
 POD_CIDR=$(curl -s -H "Metadata-Flavor: Google" \
   http://metadata.google.internal/computeMetadata/v1/instance/attributes/pod-cidr)
 
-
-
+# Create the bridge network configuration file:
 cat <<EOF | sudo tee /etc/cni/net.d/10-bridge.conf
 {
     "cniVersion": "0.3.1",
@@ -62,6 +73,8 @@ cat <<EOF | sudo tee /etc/cni/net.d/10-bridge.conf
 }
 EOF
 
+
+# Create the loopback network configuration file:
 cat <<EOF | sudo tee /etc/cni/net.d/99-loopback.conf
 {
     "cniVersion": "0.3.1",
@@ -70,6 +83,7 @@ cat <<EOF | sudo tee /etc/cni/net.d/99-loopback.conf
 }
 EOF
 
+# Create the containerd configuration file:
 sudo mkdir -p /etc/containerd/
 
 cat << EOF | sudo tee /etc/containerd/config.toml
@@ -82,7 +96,7 @@ cat << EOF | sudo tee /etc/containerd/config.toml
       runtime_root = ""
 EOF
 
-
+# Create the containerd.service systemd unit file:
 cat <<EOF | sudo tee /etc/systemd/system/containerd.service
 [Unit]
 Description=containerd container runtime
@@ -105,14 +119,14 @@ LimitCORE=infinity
 WantedBy=multi-user.target
 EOF
 
-
+# Configure the Kubelet
 {
   sudo mv ${HOSTNAME}-key.pem ${HOSTNAME}.pem /var/lib/kubelet/
   sudo mv ${HOSTNAME}.kubeconfig /var/lib/kubelet/kubeconfig
   sudo mv ca.pem /var/lib/kubernetes/
 }
 
-
+# Create the kubelet-config.yaml configuration file:
 cat <<EOF | sudo tee /var/lib/kubelet/kubelet-config.yaml
 kind: KubeletConfiguration
 apiVersion: kubelet.config.k8s.io/v1beta1
@@ -135,7 +149,7 @@ tlsCertFile: "/var/lib/kubelet/${HOSTNAME}.pem"
 tlsPrivateKeyFile: "/var/lib/kubelet/${HOSTNAME}-key.pem"
 EOF
 
-
+# Create the kubelet.service systemd unit file:
 cat <<EOF | sudo tee /etc/systemd/system/kubelet.service
 [Unit]
 Description=Kubernetes Kubelet
@@ -160,10 +174,11 @@ RestartSec=5
 WantedBy=multi-user.target
 EOF
 
+# Configure the Kubernetes Proxy
 
 sudo mv kube-proxy.kubeconfig /var/lib/kube-proxy/kubeconfig
 
-
+# Create the kube-proxy-config.yaml configuration file:
 cat <<EOF | sudo tee /var/lib/kube-proxy/kube-proxy-config.yaml
 kind: KubeProxyConfiguration
 apiVersion: kubeproxy.config.k8s.io/v1alpha1
@@ -173,7 +188,7 @@ mode: "iptables"
 clusterCIDR: "10.200.0.0/16"
 EOF
 
-
+# Create the kube-proxy.service systemd unit file:
 cat <<EOF | sudo tee /etc/systemd/system/kube-proxy.service
 [Unit]
 Description=Kubernetes Kube Proxy
@@ -189,7 +204,7 @@ RestartSec=5
 WantedBy=multi-user.target
 EOF
 
-
+# Start the Worker Services
 {
   sudo systemctl daemon-reload
   sudo systemctl enable containerd kubelet kube-proxy
