@@ -20,7 +20,7 @@ Delete the external load balancer network resources:
 ```
 {
   gcloud -q compute forwarding-rules delete kubernetes-forwarding-rule \
-    --region $(gcloud config get-value compute/region)
+    --region us-east1
 
   gcloud -q compute target-pools delete kubernetes-target-pool
 

@@ -353,7 +353,7 @@ Create the external load balancer network resources:
 ```
 {
   KUBERNETES_PUBLIC_ADDRESS=$(gcloud compute addresses describe kubernetes-the-hard-way \
-    --region $(gcloud config get-value compute/region) \
+    --region us-east1 \
     --format 'value(address)')
 
   gcloud compute http-health-checks create kubernetes \
@@ -373,9 +373,9 @@ Create the external load balancer network resources:
    --instances controller-0,controller-1,controller-2
 
   gcloud compute forwarding-rules create kubernetes-forwarding-rule \
-    --address ${KUBERNETES_PUBLIC_ADDRESS} \
+    --address 35.231.226.177 \
     --ports 6443 \
-    --region $(gcloud config get-value compute/region) \
+    --region us-east1 \
     --target-pool kubernetes-target-pool
 }
 ```
@@ -388,14 +388,14 @@ Retrieve the `kubernetes-the-hard-way` static IP address:
 
 ```
 KUBERNETES_PUBLIC_ADDRESS=$(gcloud compute addresses describe kubernetes-the-hard-way \
-  --region $(gcloud config get-value compute/region) \
+  --region us-east1 \
   --format 'value(address)')
 ```
 
 Make a HTTP request for the Kubernetes version info:
 
 ```
-curl --cacert ca.pem https://${KUBERNETES_PUBLIC_ADDRESS}:6443/version
+curl --cacert ca.pem https://35.231.226.177:6443/version
 ```
 
 > output

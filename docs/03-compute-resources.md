@@ -74,7 +74,7 @@ Allocate a static IP address that will be attached to the external load balancer
 
 ```
 gcloud compute addresses create kubernetes-the-hard-way \
-  --region $(gcloud config get-value compute/region)
+  --region us-east1
 ```
 
 Verify the `kubernetes-the-hard-way` static IP address was created in your default compute region:

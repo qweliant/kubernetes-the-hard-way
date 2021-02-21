@@ -4,11 +4,6 @@
 # Create the external load balancer network resources:
 
 {
-  KUBERNETES_PUBLIC_ADDRESS=$(gcloud compute addresses describe kubernetes-the-hard-way \
-    --region $(gcloud config get-value compute/region) \
-    --format 'value(address)')
-
-  echo "$KUBERNETES_PUBLIC_ADDRESS"
 
   gcloud compute http-health-checks create kubernetes \
     --description="Kubernetes Health Check" \
@@ -27,8 +22,8 @@
    --instances controller-0,controller-1,controller-2
 
   gcloud compute forwarding-rules create kubernetes-forwarding-rule \
-    --address ${KUBERNETES_PUBLIC_ADDRESS} \
+    --address 35.231.226.177 \
     --ports 6443 \
-    --region $(gcloud config get-value compute/region) \
+    --region us-east1 \
     --target-pool kubernetes-target-pool
 }
