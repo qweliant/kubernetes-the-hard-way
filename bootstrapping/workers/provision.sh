@@ -11,11 +11,8 @@
 # It is recommended that swap be disabled to ensure Kubernetes can 
 # provide proper resource allocation and quality of service.
 
-# check to see if on
-sudo swapon --show
-
+# turn off swap
 sudo swapoff -a
-
 
 # Download and Install Worker Binaries
 wget -q --show-progress --https-only --timestamping \
@@ -72,7 +69,6 @@ cat <<EOF | sudo tee /etc/cni/net.d/10-bridge.conf
     }
 }
 EOF
-
 
 # Create the loopback network configuration file:
 cat <<EOF | sudo tee /etc/cni/net.d/99-loopback.conf
@@ -175,7 +171,6 @@ WantedBy=multi-user.target
 EOF
 
 # Configure the Kubernetes Proxy
-
 sudo mv kube-proxy.kubeconfig /var/lib/kube-proxy/kubeconfig
 
 # Create the kube-proxy-config.yaml configuration file:
